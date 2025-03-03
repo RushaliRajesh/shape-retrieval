@@ -9,6 +9,7 @@ import trimesh
 import numpy as np
 from itertools import product
 from torch.utils.data import DataLoader 
+from functools import lru_cache 
 
 def read_classification_file(filename):
     with open(filename, "r") as f:
@@ -116,6 +117,18 @@ class ShapeData(Dataset):
 
     def __len__(self):
         return len(self.pairs)
+    
+    @lru_cache(maxsize=100)  # Store up to 1000 images in RAM
+    def load_image(self, path):
+        # print(f"Loading from disk: {path}")
+        img = Image.open(path).convert("RGB")
+        return img
+
+    @lru_cache(maxsize=100)  # Store up to 1000 images in RAM
+    def load_mesh(self, path):
+        # print(f"Loading from disk: {path}")
+        mesh = o3d.io.read_triangle_mesh(path)
+        return mesh
 
     def __getitem__(self, index):
         sketch_id, model_id, class_name, target = self.pairs[index]
@@ -123,8 +136,10 @@ class ShapeData(Dataset):
         sketch_path = os.path.join(self.sketch_dir, f"{class_name}/{self.label}/{sketch_id}.png")
         model_path = os.path.join(self.model_dir, f"M{model_id}.off")
 
-        sketch = Image.open(sketch_path).convert("RGB")
-        mesh = o3d.io.read_triangle_mesh(model_path)
+        # sketch = Image.open(sketch_path).convert("RGB")
+        # mesh = o3d.io.read_triangle_mesh(model_path)
+        sketch = self.load_image(sketch_path)
+        mesh = self.load_mesh(model_path)
         if len(mesh.vertices) == 0:
             return None, None, None
         pcd = o3d.geometry.PointCloud()

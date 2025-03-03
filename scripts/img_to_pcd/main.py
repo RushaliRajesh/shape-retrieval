@@ -15,6 +15,9 @@ from dataset_load import ShapeData
 from loss_util import ContrastiveLoss
 from model import basicmodel
 import pdb
+# from torch.utils.tensorboard import SummaryWriter
+
+# writer = SummaryWriter('runs/base_method1')
 
 def read_classification_file(filename):
     with open(filename, "r") as f:
@@ -130,9 +133,9 @@ print("len of te dataloader: ", len(te_dataloader))
 
 start = time.time()
 for ind, i in enumerate(te_dataloader):
-    if ind == 10:
+    if ind == 100:
         break
-print(f"DataLoader time per batch: {(time.time() - start) / 10:.4f} seconds")
+print(f"DataLoader time per batch: {(time.time() - start) / 100:.4f} seconds")
 
 pdb.set_trace()
 
